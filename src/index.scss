@@ -1,0 +1,29 @@
+@import '~antd/dist/antd.css';
+
+#root {
+  height: 100%;
+}
+
+.container {
+  height: 100%;
+
+  .logo {
+    height: 64px;
+  }
+
+  .site-layout {
+
+    .site-header {
+      background: #fff;
+    }
+
+    .content {
+      overflow: auto;
+      margin: 0 10px 10px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 5px #ccc;
+    }
+  }
+}
