@@ -6,6 +6,7 @@ import { Layout, Menu } from 'antd';
 import DashBoard from './pages/dashboard/dashboard';
 import Cookbook from './pages/cookbook/cookbook';
 import CookbookDetail from './pages/cookbook-detail/cookbook-detail';
+import Category from './pages/category/category';
 
 import reportWebVitals from './reportWebVitals';
 
@@ -18,10 +19,16 @@ const App = () => {
     <Layout className="container">
       <Sider>
         <div className="logo" />
-        <Menu theme="dark" mode="inline">
-          <Menu.Item>1</Menu.Item>
-          <Menu.Item>2</Menu.Item>
-          <Menu.Item>3</Menu.Item>
+        <Menu theme="dark" mode="inline" defaultSelectedKeys={['1']}>
+          <Menu.Item key="1">
+            <a href="/">首页</a>
+          </Menu.Item>
+          <Menu.Item key="2">
+            <a href="cookbooks">菜谱管理</a>
+          </Menu.Item>
+          <Menu.Item key="3">
+            <a href="/category">类目管理</a>
+          </Menu.Item>
         </Menu>
       </Sider>
       <Layout className="site-layout">
@@ -32,6 +39,7 @@ const App = () => {
             <Switch>
               <Route exact path="/cookbooks" component={Cookbook} />
               <Route exact path="/cookbooks/detail" component={CookbookDetail} />
+              <Route exact path="/category" component={Category} />
               <Route exact path="/" component={DashBoard} />
             </Switch>
           </BrowserRouter>
