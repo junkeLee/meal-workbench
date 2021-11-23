@@ -6,3 +6,10 @@ export const getList = (params: any = {}) => {
     .then(res => res.data)
     .catch(() => {});
 };
+
+
+export const getDetail = (id: number) => {
+  return axios.get('/api/category/business/detail', { params: { id }})
+    .then(res => res.data)
+    .catch(() => {});
+};

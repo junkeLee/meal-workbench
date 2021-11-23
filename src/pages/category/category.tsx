@@ -1,18 +1,22 @@
 import React, { Fragment } from 'react';
 import { Row, Col, Table, Image, Divider } from 'antd';
+
 import imgurl from 'utils/imgurl';
+
+import { connector, PropsFromRedux } from './connector';
+import CategoryDetail from './detail';
+
 import { ICategory } from './category.interface';
 import { getList } from './service';
 
 import './category.scss';
 
-// import { rootList, firstList } from './mock.json';
-
-interface IProps {
+interface IProps extends PropsFromRedux {
   a?: string
 };
 
 interface IState {
+  visible?: boolean;
   rootList?: ICategory[];
   secondaryList?: ICategory[];
 };
@@ -22,6 +26,7 @@ class Category extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
+      visible: true,
       rootList: [],
       secondaryList: []
     }
@@ -60,6 +65,7 @@ class Category extends React.Component<IProps, IState> {
   ];
 
   componentDidMount() {
+    console.log('props', this.props);
     this.getList();
   }
 
@@ -71,12 +77,12 @@ class Category extends React.Component<IProps, IState> {
     const res = await getList(params);
     console.log('res', res);
     this.setState({
-      [key]: res.data || []
+      [key]: res?.data || []
     });
   }
 
   render() {
-    const { rootList, secondaryList } = this.state;
+    const { visible, rootList, secondaryList } = this.state;
     return (
       <Row className="category">
         <Col className="block" span={11}>
@@ -100,9 +106,14 @@ class Category extends React.Component<IProps, IState> {
             pagination={false}
           />
         </Col>
+        <CategoryDetail
+          visible={visible}
+          rootList={rootList}
+          id={2}
+        />
       </Row>
     );
   }
 };
 
-export default Category;
+export default connector(Category);

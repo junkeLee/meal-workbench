@@ -1,17 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 
-import DashBoard from './pages/dashboard/dashboard';
-import Cookbook from './pages/cookbook/cookbook';
-import CookbookDetail from './pages/cookbook-detail/cookbook-detail';
-import Category from './pages/category/category';
+import store from 'redux/store';
+
+import BreadCrumb from 'components/breadcrumb';
+
+import DashBoard from 'pages/dashboard/dashboard';
+import Cookbook from 'pages/cookbook/cookbook';
+import CookbookDetail from 'pages/cookbook-detail/cookbook-detail';
+import Category from 'pages/category/category';
 
 import reportWebVitals from './reportWebVitals';
 
 import './index.scss';
-import BreadCrumb from './components/breadcrumb';
+
 
 const { Header, Content, Sider } = Layout;
 const App = () => {
@@ -50,9 +55,9 @@ const App = () => {
 };
 
 ReactDOM.render(
-  <React.StrictMode>
+  <Provider store={store}>
     <App />
-  </React.StrictMode>,
+  </Provider>,
   document.getElementById('root')
 );
 
