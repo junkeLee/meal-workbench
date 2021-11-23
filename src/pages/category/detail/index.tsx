@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Upload, Select, Radio, Image } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { ICategory } from '../category.interface';
+import { ICategory } from 'interfaces/category.interface';
 import { getDetail } from '../service';
 
 import './index.scss';

@@ -1,22 +1,19 @@
 import React, { Fragment } from 'react';
 import { Row, Col, Table, Image, Divider } from 'antd';
-
-import imgurl from 'utils/imgurl';
-
-import { connector, PropsFromRedux } from './connector';
 import CategoryDetail from './detail';
 
-import { ICategory } from './category.interface';
+import { ICategory } from 'interfaces/category.interface';
 import { getList } from './service';
 
 import './category.scss';
 
-interface IProps extends PropsFromRedux {
-  a?: string
+interface IProps {
 };
 
 interface IState {
   visible?: boolean;
+  choosedRootItem?: object,
+  list?: ICategory[];
   rootList?: ICategory[];
   secondaryList?: ICategory[];
 };
@@ -26,7 +23,9 @@ class Category extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      visible: true,
+      visible: false,
+      choosedRootItem: {},
+      list: [],
       rootList: [],
       secondaryList: []
     }
@@ -43,7 +42,7 @@ class Category extends React.Component<IProps, IState> {
       dataIndex: 'image',
       width: 100,
       render: (text: string) => (
-        <Image width={48} src={imgurl(text || '/cookbooks/17c82a99e2afc642d72ba705.jpg')}/>
+        <Image width={48} src="https://static.meishichina.com/v6/img/zhen/r07.jpg"/>
       )
     },
     {
@@ -54,7 +53,7 @@ class Category extends React.Component<IProps, IState> {
         <div className="action">
           {!!record.isRoot && (
             <Fragment>
-              <a onClick={() => this.getSecondaryList(record.id)}>展开子集</a>
+              <a onClick={() => this.getSecondaryList(record)}>展开子集</a>
               <Divider type="vertical" />
             </Fragment>
           )}
@@ -65,20 +64,40 @@ class Category extends React.Component<IProps, IState> {
   ];
 
   componentDidMount() {
-    console.log('props', this.props);
-    this.getList();
+    this.loadData();
   }
 
-  getSecondaryList(pid: number) {
-    this.getList({ parentId: pid, isRoot: 0 }, 'secondaryList');
-  }
-
-  async getList(params = {}, key = 'rootList') {
+  /**
+   * 获取类目数据
+   * @param params 查询字段
+   */
+  async loadData(params = {}) {
     const res = await getList(params);
-    console.log('res', res);
     this.setState({
-      [key]: res?.data || []
+      list: res.data,
+      rootList: this.filterRootList<ICategory[]>(res.data, )
     });
+  }
+
+  /**
+   * 获取子类目
+   * @param item 选中的类目
+   * @returns 
+   */
+  getSecondaryList(item: ICategory) {
+    const { list } = this.state;
+    this.setState({
+      secondaryList: list.filter(i => i.parentId === item.id)
+    });
+  }
+
+  /**
+   * 获得跟类目列表
+   * @param list 类目列表
+   * @returns 
+   */
+   filterRootList<T>(list): T {
+    return list.filter(i => i.isRoot);
   }
 
   render() {
@@ -86,7 +105,7 @@ class Category extends React.Component<IProps, IState> {
     return (
       <Row className="category">
         <Col className="block" span={11}>
-          <h3>一级类目</h3>
+          <h3>类目</h3>
           <Table
             size="small"
             columns={this.columns}
@@ -116,4 +135,4 @@ class Category extends React.Component<IProps, IState> {
   }
 };
 
-export default connector(Category);
+export default Category;

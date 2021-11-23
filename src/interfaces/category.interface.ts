@@ -4,4 +4,4 @@ export interface ICategory {
   image: string;
   isRoot: number;
   parentId: number;
-};
+}
