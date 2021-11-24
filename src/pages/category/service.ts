@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ICategory } from 'interfaces/category.interface';
 
-const mockList: ICategory[] = [
+var mockList: ICategory[] = [
   { id: 1, image: null, name: '肉类', isRoot: 1, parentId: null },
   { id: 2, image: null, name: '各地菜系', isRoot: 1, parentId: null },
   { id: 3, image: null, name: '牛肉类', isRoot: 0, parentId: 1 },
@@ -26,4 +26,25 @@ export const getDetail = (id: number) => {
   return axios.get('/api/category/business/detail', { params: { id }})
     .then(res => res.data)
     .catch(() => {});
+};
+
+export const addCategory = (item) => {
+  const last = mockList[mockList.length];
+  mockList.push({ ...item, id: last.id + 1 });
+  // return axios.post('/api/category/business/create', { data: { data: item } })
+  //   .then(res => res.data)
+  //   .catch(() => {});
+};
+
+export const editCategory = (item) => {
+  console.log('edit', item);
+  mockList = mockList.map(i => {
+    if (i.id === item.id) {
+      return {
+        ...i,
+        ...item
+      };
+    }
+    return i;
+  });
 };

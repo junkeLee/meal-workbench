@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Upload, Select, Radio, Image } from 'antd';
+import { Modal, Form, Input, Upload, Select, Image } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { ICategory } from 'interfaces/category.interface';
-import { getDetail } from '../service';
+import { editCategory, addCategory } from '../service';
 
 import './index.scss';
-
 interface IProps {
   visible?: boolean;
-  id?: number;
-  rootList?: ICategory[]
+  item?: ICategory;
+  rootList?: ICategory[];
+  onClose?: Function;
+  onFinish?: Function;
 };
 
 const CategoryDetail = (props: IProps) => {
-  const { visible, id, rootList } = props;
+  const { visible, item, rootList, onClose, onFinish } = props;
 
   const [loading, setLoading] = useState(false);
-  const [title, setTitle] = useState('新建');
   const [image, setImage] = useState(null);
   const [form] = Form.useForm();
 
@@ -26,48 +26,56 @@ const CategoryDetail = (props: IProps) => {
   }
 
   useEffect(() => {
-    loadData(id);
-  }, [visible]);
+    form.setFieldsValue({
+      name: item?.name,
+      image: item?.image,
+      parentId: item?.parentId ?? 0
+    });
+  }, [item?.id]);
 
-  const loadData = async(id: number) => {
-    if (id > 0) {
-
-      const res = await getDetail(id);
-      console.log('res', res);
-      // 加载数据
-      form.setFieldsValue({
-        name: '测试的',
-        image: 'http://image.yoolife.cn/cookbooks/17d0d941127111576ea8adecf.jpg',
-        isRoot: 0,
-        parentId: 1
-      });
-      setTitle('编辑');
-      setImage('http://image.yoolife.cn/cookbooks/17d0d941127111576ea8adecf.jpg')
-      return;
-    }
-    // 新建
-    
-  };
-
-   const handleChange = (info: any) => {
+  /**
+   * 
+   * @param info 文件信息
+   * @returns 
+   */
+   const handleUploadChange = (info: any) => {
     if (info.file.status === 'uploading') {
       setLoading(true);
       return;
     }
     if (info.file.status === 'done') {
       setLoading(false);
-      console.log('info', info);
       setImage(info.file.response.data);
       form.setFieldsValue({ image: info.file.response.data });
     }
   };
 
+  const submit = async() => {
+    const value = form.getFieldsValue();
+    console.log('value', value);
+
+    const data = {
+      ...value,
+      isRoot: value.parentId ? 0 : 1,
+      parentId: value.parentId ?? null
+    };
+
+    if (item?.id) {
+      await editCategory({...data, id: item?.id });
+      onFinish();
+      return;
+    }
+    addCategory(data);
+  };
+
   return (
     <Modal
-      title={title}
+      title={item?.id ? '编辑': '新建'}
       visible={visible}
       okText="确定"
       cancelText="关闭"
+      onCancel={() => onClose()}
+      onOk={submit}
     >
       <Form
         layout="horizontal"
@@ -83,7 +91,7 @@ const CategoryDetail = (props: IProps) => {
             className="avatar"
             showUploadList={false}
             action="/api/file/upload"
-            onChange={handleChange}
+            onChange={handleUploadChange}
           >
             {image ? (
               <Image src={image} preview={false} />
@@ -92,16 +100,11 @@ const CategoryDetail = (props: IProps) => {
             )}
           </Upload>
         </Form.Item>
-        <Form.Item label="是否根类目" name="isRoot" required>
-          <Radio.Group>
-            <Radio value={1}>是</Radio>
-            <Radio value={0}>否</Radio>
-          </Radio.Group>
-        </Form.Item>
         <Form.Item label="父级类目" {...formItemLayout} name="parentId" required>
           <Select>
+            <Select.Option value={0}>无</Select.Option>
             {rootList?.map(item => (
-              <Select.Option key={item.id} value={item.parentId}>{item.name}</Select.Option>
+              <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
             ))}
           </Select>
         </Form.Item>

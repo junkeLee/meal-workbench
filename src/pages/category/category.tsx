@@ -12,7 +12,8 @@ interface IProps {
 
 interface IState {
   visible?: boolean;
-  choosedRootItem?: object,
+  choosedRootItem?: ICategory;
+  choosedEditItem?: ICategory;
   list?: ICategory[];
   rootList?: ICategory[];
   secondaryList?: ICategory[];
@@ -24,7 +25,8 @@ class Category extends React.Component<IProps, IState> {
     super(props);
     this.state = {
       visible: false,
-      choosedRootItem: {},
+      choosedRootItem: null,
+      choosedEditItem: null,
       list: [],
       rootList: [],
       secondaryList: []
@@ -51,13 +53,13 @@ class Category extends React.Component<IProps, IState> {
       width: 100,
       render: (_: string, record: ICategory) => (
         <div className="action">
-          {!!record.isRoot && (
+          {record.isRoot > 0 && (
             <Fragment>
-              <a onClick={() => this.getSecondaryList(record)}>展开子集</a>
+              <a onClick={() => this.getSecondaryList(record)}>展开子类目</a>
               <Divider type="vertical" />
             </Fragment>
           )}
-          <a>编辑</a>
+          <a onClick={() => this.editItem(record)}>编辑</a>
         </div>
       )
     }
@@ -75,7 +77,7 @@ class Category extends React.Component<IProps, IState> {
     const res = await getList(params);
     this.setState({
       list: res.data,
-      rootList: this.filterRootList<ICategory[]>(res.data, )
+      rootList: this.filterRootList(res.data)
     });
   }
 
@@ -87,7 +89,19 @@ class Category extends React.Component<IProps, IState> {
   getSecondaryList(item: ICategory) {
     const { list } = this.state;
     this.setState({
+      choosedRootItem: item,
       secondaryList: list.filter(i => i.parentId === item.id)
+    });
+  }
+
+  /**
+   * 编辑类目
+   * @param item 要编辑的类目
+   */
+  editItem(item: ICategory) {
+    this.setState({
+      choosedEditItem: item,
+      visible: true
     });
   }
 
@@ -96,12 +110,12 @@ class Category extends React.Component<IProps, IState> {
    * @param list 类目列表
    * @returns 
    */
-   filterRootList<T>(list): T {
+   filterRootList(list: ICategory[]) {
     return list.filter(i => i.isRoot);
   }
 
   render() {
-    const { visible, rootList, secondaryList } = this.state;
+    const { visible, choosedRootItem, choosedEditItem, rootList, secondaryList } = this.state;
     return (
       <Row className="category">
         <Col className="block" span={11}>
@@ -116,7 +130,7 @@ class Category extends React.Component<IProps, IState> {
         </Col>
         <Col className="block" span={2}></Col>
         <Col className="block" span={11}>
-          <h3>二级类目</h3>
+          <h3>{choosedRootItem?.name && `${choosedRootItem.name}-`}二级类目</h3>
           <Table
             size="small"
             columns={this.columns}
@@ -128,7 +142,9 @@ class Category extends React.Component<IProps, IState> {
         <CategoryDetail
           visible={visible}
           rootList={rootList}
-          id={2}
+          item={choosedEditItem}
+          onClose={() => this.setState({ visible: false })}
+          onFinish={() => this.setState({ visible: false })}
         />
       </Row>
     );
