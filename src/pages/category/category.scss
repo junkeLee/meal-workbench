@@ -5,4 +5,10 @@
   .block {
     
   }
+
+  .action {
+    display: flex;
+    padding: 10px 0;
+    justify-content: flex-end;
+  }
 }

@@ -1,11 +1,17 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { Fragment } from 'react';
-import { Row, Col, Table, Image, Divider } from 'antd';
+import { Row, Col, Table, Image, Divider, Button } from 'antd';
 import CategoryDetail from './detail';
 
 import { ICategory } from 'interfaces/category.interface';
 import { getList } from './service';
 
 import './category.scss';
+
+enum CloseType {
+  Pure,
+  Effect
+};
 
 interface IProps {
 };
@@ -55,11 +61,11 @@ class Category extends React.Component<IProps, IState> {
         <div className="action">
           {record.isRoot > 0 && (
             <Fragment>
-              <a onClick={() => this.getSecondaryList(record)}>展开子类目</a>
+              <a href="#" onClick={() => this.getSecondaryList(record)}>展开子类目</a>
               <Divider type="vertical" />
             </Fragment>
           )}
-          <a onClick={() => this.editItem(record)}>编辑</a>
+          <a onClick={() => this.openDetailModal(record)}>编辑</a>
         </div>
       )
     }
@@ -95,18 +101,23 @@ class Category extends React.Component<IProps, IState> {
   }
 
   /**
-   * 编辑类目
+   * 打开编辑类目弹框
    * @param item 要编辑的类目
    */
-  editItem(item: ICategory) {
+  openDetailModal(item?: ICategory) {
     this.setState({
-      choosedEditItem: item,
+      choosedEditItem: item ?? null,
       visible: true
     });
   }
 
+  closeDetailModal(closeType: CloseType) {
+    this.setState({ visible: false });
+    closeType === CloseType.Effect && this.loadData();
+  }
+
   /**
-   * 获得跟类目列表
+   * 获得根类目列表
    * @param list 类目列表
    * @returns 
    */
@@ -119,7 +130,7 @@ class Category extends React.Component<IProps, IState> {
     return (
       <Row className="category">
         <Col className="block" span={11}>
-          <h3>类目</h3>
+          <h3>一级类目</h3>
           <Table
             size="small"
             columns={this.columns}
@@ -127,6 +138,9 @@ class Category extends React.Component<IProps, IState> {
             rowKey={record => (record.name as string)}
             pagination={false}
           />
+          <div className="action">
+            <Button type="primary" onClick={() => this.openDetailModal()}>新建</Button>
+          </div>
         </Col>
         <Col className="block" span={2}></Col>
         <Col className="block" span={11}>
@@ -143,8 +157,8 @@ class Category extends React.Component<IProps, IState> {
           visible={visible}
           rootList={rootList}
           item={choosedEditItem}
-          onClose={() => this.setState({ visible: false })}
-          onFinish={() => this.setState({ visible: false })}
+          onClose={() => this.closeDetailModal(CloseType.Pure)}
+          onFinish={() => this.closeDetailModal(CloseType.Effect)}
         />
       </Row>
     );

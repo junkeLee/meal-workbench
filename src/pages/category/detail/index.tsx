@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Form, Input, Upload, Select, Image } from 'antd';
+import { Modal, Form, Input, Upload, Image } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { ICategory } from 'interfaces/category.interface';
 import { editCategory, addCategory } from '../service';
@@ -8,13 +8,14 @@ import './index.scss';
 interface IProps {
   visible?: boolean;
   item?: ICategory;
+  rootItem?: ICategory;
   rootList?: ICategory[];
   onClose?: Function;
   onFinish?: Function;
 };
 
 const CategoryDetail = (props: IProps) => {
-  const { visible, item, rootList, onClose, onFinish } = props;
+  const { visible, item, rootItem, onClose, onFinish } = props;
 
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
@@ -28,10 +29,9 @@ const CategoryDetail = (props: IProps) => {
   useEffect(() => {
     form.setFieldsValue({
       name: item?.name,
-      image: item?.image,
-      parentId: item?.parentId ?? 0
+      image: item?.image
     });
-  }, [item?.id]);
+  }, [visible]);
 
   /**
    * 
@@ -51,13 +51,15 @@ const CategoryDetail = (props: IProps) => {
   };
 
   const submit = async() => {
-    const value = form.getFieldsValue();
+    // const value = form.getFieldsValue();
+    const value = await form.validateFields();
     console.log('value', value);
 
     const data = {
       ...value,
-      isRoot: value.parentId ? 0 : 1,
-      parentId: value.parentId ?? null
+      image: 'test.png',
+      isRoot: rootItem ? 0 : 1,
+      parentId: rootItem?.id ?? null
     };
 
     if (item?.id) {
@@ -66,6 +68,7 @@ const CategoryDetail = (props: IProps) => {
       return;
     }
     addCategory(data);
+    onFinish();
   };
 
   return (
@@ -76,15 +79,35 @@ const CategoryDetail = (props: IProps) => {
       cancelText="关闭"
       onCancel={() => onClose()}
       onOk={submit}
+      afterClose={() => form.resetFields()}
     >
       <Form
         layout="horizontal"
         form={form}
       >
-        <Form.Item label="名称" {...formItemLayout} name="name" required>
-          <Input />
+        <Form.Item
+          {...formItemLayout}
+          label="名称"
+          name="name"
+          rules={[
+            {
+              required: true,
+              message: '请输入类目名称',
+            },
+            {
+              max: 5,
+              message: '最多五个字'
+            }
+          ]}
+        >
+          <Input placeholder="请输入类目名称，最多五个字" />
         </Form.Item>
-        <Form.Item label="图标" {...formItemLayout} name="image" required>
+        <Form.Item
+          {...formItemLayout}
+          label="图标"
+          name="image"
+          required
+        >
           <Upload
             name="file"
             listType="picture-card"
@@ -100,13 +123,8 @@ const CategoryDetail = (props: IProps) => {
             )}
           </Upload>
         </Form.Item>
-        <Form.Item label="父级类目" {...formItemLayout} name="parentId" required>
-          <Select>
-            <Select.Option value={0}>无</Select.Option>
-            {rootList?.map(item => (
-              <Select.Option key={item.id} value={item.id}>{item.name}</Select.Option>
-            ))}
-          </Select>
+        <Form.Item label="所属类目" {...formItemLayout}>
+          {rootItem?.name || '无'}
         </Form.Item>
       </Form>
     </Modal>

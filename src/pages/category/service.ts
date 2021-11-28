@@ -29,7 +29,7 @@ export const getDetail = (id: number) => {
 };
 
 export const addCategory = (item) => {
-  const last = mockList[mockList.length];
+  const last = mockList[mockList.length - 1];
   mockList.push({ ...item, id: last.id + 1 });
   // return axios.post('/api/category/business/create', { data: { data: item } })
   //   .then(res => res.data)
